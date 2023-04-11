@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="stylesheet" href="webpage.css">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <style>
+	h1 {
+	font-family: georgia, serif;
+	font-weight: 900%;
+	text-align: center;
+	font-size: 350%;
+	padding: 10px;
+	margin: 2px;
+	color: #be0000;
+	-webkit-text-stroke-color: white;
+	text-shadow: -1px 1px 0 #fff,
+		1px 1px 0 #fff,
+		1px -1px 0 #fff,
+		-1px -1px 0 #fff;
+}
+	p.busstop {
+	font-family: gill sans; sans-serif;
+	font-weight: 200%;
+	text-align: center;
+	font-size: 140%;
+	padding: 0px;
+	margin: 0px;
+	color: #be0000;
+}
+p.popup {
+	font-family: georgia; sans-serif;
+	font-weight: 10%;
+	font-size: 100%;
+	padding: 0;
+	margin: 0;
+	color: grey;
+	text-transform: capitalize;
+}
+
+p.intro {
+	font-family: georgia; sans-serif;
+	font-weight: 10%;
+	font-size: 100%;
+	padding: 5px;
+	margin: 0;
+	color: black;
+}
+
+	p {
+	font-family: georgia, sans-serif;
+	font-weight: 100%;
+	text-align: center;
+	font-size: 100%;
+	padding: 0px;
+	margin: 2px;
+	color: white;
+}
+p.desc{
+	font-family: georgia, sans-serif;
+	font-weight: 100%;
+	text-align: left;
+	font-size: 100%;
+	padding-left: 20px;
+	padding-right: 20px;
+	margin: 5px;
+	color: white;
+	padding-top: 10px;
+}
+
+        body {
+    margin: 0;
+    height: calc(100% - 100px); 
+}
+
+html {
+	height: 100%;
+	background-color: #6b0105;
+}
+ #map {
+    height: 100%;
+width: 90%;
+border-style: solid;
+border-width: 4px;
+border-color: white;
+display: block;
+margin-left: auto;
+margin-right: auto;
+margin-bottom: 50px;
+top: 2%;
+float: center;
+}
+
+#img {
+height: 300px;
+width: 400px;
+border: solid 4px white;
+display: inline-block;
+padding-right: 0;
+margin-left: 45px;
+margin-right: auto;
+float: center;
+}
+
+#par {
+float: left;
+Display: inline-block;
+font-size: 10px;
+font-size: 10px;
+padding-left: 20px;
+ background-color: red;
+  animation-name: example;
+  animation-duration: 4s;
+  Animation-iteration-count: infinite;
+}
+
+header.navbar {
+    margin-bottom: 0; 
+}
+        </style>
+        <title></title>
+    </head>
+    <body>
+	<h1> Singapore's Bus Stops </h1>
+		<p> Take a look at Singapore's over 5,000 bus stops below. </p>
+ <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="data/Reprojected_1.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[1.1169299690489125,103.55457852256879],[1.560492173525136,104.09618510246852]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_StamenTonerLite_0');
+        map.getPane('pane_StamenTonerLite_0').style.zIndex = 400;
+        var layer_StamenTonerLite_0 = L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {
+            pane: 'pane_StamenTonerLite_0',
+            opacity: 1.0,
+            attribution: '<a href="https://maps.stamen.com/">Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 2,
+            maxNativeZoom: 20
+        });
+        layer_StamenTonerLite_0;
+        map.addLayer(layer_StamenTonerLite_0);
+        function pop_Reprojected_1(feature, layer) {
+            var popupContent = '<table>\
+		    <tr>\
+                        <td colspan="2"> <p class="busstop">' + (feature.properties['LOC_DESC'] !== null ? autolinker.link(feature.properties['LOC_DESC'].toLocaleString()) : '') + '</p></td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"> <p class="popup">Stop Number: ' + (feature.properties['BUS_STOP_N'] !== null ? autolinker.link(feature.properties['BUS_STOP_N'].toLocaleString()) : '') + '</p></td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Reprojected_1_0() {
+            return {
+                pane: 'pane_Reprojected_1',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,0.8705882352941177)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,47,44,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Reprojected_1');
+        map.getPane('pane_Reprojected_1').style.zIndex = 401;
+        map.getPane('pane_Reprojected_1').style['mix-blend-mode'] = 'normal';
+        var layer_Reprojected_1 = new L.geoJson(json_Reprojected_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Reprojected_1',
+            layerName: 'layer_Reprojected_1',
+            pane: 'pane_Reprojected_1',
+            onEachFeature: pop_Reprojected_1,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Reprojected_1_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Reprojected_1);
+        map.addLayer(layer_Reprojected_1);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/Reprojected_1.png" /> Bus Stops': layer_Reprojected_1,"Basemap": layer_StamenTonerLite_0,}).addTo(map);
+        setBounds();
+
+      var marker = L.marker([1.332083, 103.819836], {
+        draggable: true,
+        title: "Introduction",
+		opacity: 0.7,
+      })
+		.addTo(map)
+		.bindPopup("<p class=intro> Singapore is renowned for its Mass Rapid Transit system, including its highly-developed bus system. Buses are an integral part of most Singaporeans' daily routines. Zoom in and out, search for a specific address to locate nearby stops, and click on any stop for more information. This popup is moveable.</p> <img src='https://a.cdn-hotels.com/gdcs/production7/d539/70727a75-55f6-4002-ac54-d2c6195c64cd.jpg', width=300, height=200>").openPopup().openOn(map);
+	
+	var popup = L.popup()
+	.setLatLng([1.59, 103.82])
+	.setContent('<h2>Bus Stops of Singapore</h2>')
+	.openOn(map);
+
+        </script>
+<pre>
+</pre>
+<p> Map by Benen Chancey. Data from Singapore National Government. </p>
+<pre>   
+</pre>
+    </body>
+</html>
